@@ -1072,4 +1072,17 @@
       });
 
       $("video").addEventListener("error", function () {
-        if (selected
+        if (selectedChannel) {
+          setPlayerMessage(
+            "Video oynatılamadı. Yayın adresi, ağ erişimi veya video biçimi desteklenmiyor olabilir.",
+            true
+          );
+        }
+      });
+
+      renderChannels();
+    })();
+  </script>
+</body>
+</html>
+```
