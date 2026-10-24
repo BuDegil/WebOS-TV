@@ -1,30 +1,589 @@
-<!doctype html>
+```html
+<!DOCTYPE html>
 <html lang="tr">
 <head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="description" content="M3U/M3U8 oynatma listelerini yüklemek, aramak ve dışa aktarmak için tarayıcı tabanlı IPTV liste yöneticisi."><title>IPTV Liste Yöneticisi</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="color-scheme" content="dark">
+<title>IPTV TV</title>
 <style>
-:root{color-scheme:dark;--bg:#0b1020;--panel:#131b2e;--panel2:#1a2540;--text:#eef3ff;--muted:#9cabc9;--line:#2b3957;--accent:#68d5bd;--warn:#ffcc80}*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at top,#172643,var(--bg) 58%);color:var(--text);font:15px/1.5 system-ui,-apple-system,Segoe UI,sans-serif}header{padding:28px max(18px,calc((100vw - 1180px)/2));border-bottom:1px solid var(--line)}h1{margin:0;font-size:clamp(1.6rem,3vw,2.3rem)}header p,.muted{color:var(--muted)}main{max-width:1180px;margin:22px auto;padding:0 16px;display:grid;grid-template-columns:minmax(0,1fr) minmax(280px,360px);gap:18px}.panel{background:#111a2cdd;border:1px solid var(--line);border-radius:16px;padding:16px;min-width:0}h2{font-size:1.05rem;margin:0 0 12px}label{display:block;font-size:.88rem;color:var(--muted);margin:10px 0 5px}input,select,button{font:inherit;border-radius:10px;border:1px solid var(--line);padding:10px 12px;background:var(--panel2);color:var(--text);max-width:100%}input[type=text],input[type=url],select{width:100%}button{cursor:pointer;font-weight:650}button:hover{border-color:var(--accent)}button.primary{background:var(--accent);color:#06251f;border-color:transparent}button:disabled{opacity:.5;cursor:not-allowed}.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.row>*{flex:1}.sources{display:grid;gap:8px}.source{display:flex;align-items:center;gap:8px;text-align:left;width:100%;font-weight:500}.source span{font-size:.82rem;color:var(--muted);margin-left:auto}.notice{padding:10px 12px;border:1px solid #66532d;background:#2c2417;color:var(--warn);border-radius:10px;font-size:.86rem}.status{color:var(--muted);font-size:.9rem;margin:12px 0}.layout{display:grid;grid-template-columns:minmax(0,1fr);gap:16px}.player{width:100%;background:#03060c;border-radius:12px;max-height:360px;min-height:180px}video{width:100%;max-height:360px;aspect-ratio:16/9}.listhead{display:flex;justify-content:space-between;gap:8px;align-items:center;flex-wrap:wrap}.channels{display:grid;gap:7px;margin-top:12px}.channel{display:flex;align-items:center;gap:10px;text-align:left;width:100%;background:#172239}.channel .name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1}.channel small{color:var(--muted);font-weight:400}.empty{padding:28px;text-align:center;color:var(--muted);border:1px dashed var(--line);border-radius:12px}.tiny{font-size:.8rem;color:var(--muted)}footer{max-width:1180px;margin:0 auto;padding:0 16px 24px;color:var(--muted);font-size:.82rem}@media(max-width:850px){main{grid-template-columns:1fr}.sidebar{order:2}}
-</style></head><body>
-<header><h1>📺 IPTV Liste Yöneticisi</h1><p>M3U/M3U8 listelerini yükle, kanalları bul ve oynatmayı dene. Tek HTML dosyasıyla çalışır.</p></header>
-<main><section class="layout"><div class="panel"><h2>Liste kaynağı</h2><label for="url">M3U / M3U8 adresi</label><div class="row"><input id="url" type="url" placeholder="https://ornek.com/liste.m3u"><button class="primary" id="loadUrl">Listeyi yükle</button></div><label for="file">Bilgisayardan liste yükle</label><div class="row"><input id="file" type="file" accept=".m3u,.m3u8,.txt,audio/x-mpegurl,application/vnd.apple.mpegurl"><button id="export" disabled>M3U dışa aktar</button></div><p class="tiny">Kaynak listesi yüklenemezse yerel dosya seçmeyi deneyin. Tarayıcı CORS kısıtlamaları bazı uzak sunuculara erişimi engelleyebilir.</p></div>
-<div class="panel"><div class="listhead"><h2>Kanallar</h2><span id="count" class="tiny">0 kanal</span></div><label for="search">Kanal ara</label><input id="search" type="text" placeholder="Kanal adı yaz…"><label for="group">Gruba göre filtrele</label><select id="group"><option value="">Tüm gruplar</option></select><div id="status" class="status" role="status">Bir liste yükleyin veya hazır kaynak seçin.</div><div id="channels" class="channels"><div class="empty">Henüz liste yüklenmedi.</div></div></div></section>
-<aside class="layout sidebar"><div class="panel"><h2>Hazır kaynaklar</h2><div class="sources">
-<button class="source" data-url="https://onureroz.com/indirmeler/turk/index.m3u">Onur Eröz · Türkçe liste <span>M3U</span></button>
-<button class="source" data-url="https://onureroz.com/indirmeler/turk/all.m3u">Onur Eröz · Türkçe tümü <span>M3U</span></button>
-<button class="source" data-url="https://onureroz.com/indirmeler/dunya/index.m3u">Onur Eröz · Dünya <span>M3U</span></button>
-<button class="source" data-url="https://iptv-org.github.io/iptv/index.m3u">iptv-org · Genel <span>M3U</span></button>
-<button class="source" data-url="https://raw.githubusercontent.com/Free-TV/IPTV/master/playlist.m3u8">Free-TV · Ücretsiz yayınlar <span>M3U8</span></button></div><p class="tiny">Üçüncü taraf listelerin içeriği ve erişilebilirliği zamanla değişebilir.</p></div>
-<div class="panel"><h2>Oynatıcı</h2><video id="video" controls playsinline preload="none"></video><div id="playing" class="status">Bir kanal seçerek oynatmayı deneyin.</div><div class="notice">Yalnızca erişim ve kullanım hakkınız olan yayınları kullanın. Bu araç yayın sağlamaz; sadece verdiğiniz listedeki adresleri açmayı dener.</div></div></aside></main>
-<footer>Gizlilik: Seçtiğiniz yerel dosya tarayıcı içinde işlenir. Uzak liste yüklemek için tarayıcı ilgili kaynağa istek gönderir. Otomatik arka plan yenileme bu basit sürümde kapalıdır.</footer>
+:root {
+  --bg:#09111d;
+  --panel:#121f30;
+  --panel2:#192b40;
+  --text:#f5f8ff;
+  --muted:#b7c6d9;
+  --green:#52e0a0;
+  --blue:#70b8ff;
+  --border:#30445d;
+  --danger:#ff8c8c;
+}
+* { box-sizing:border-box; }
+html { font-size:20px; }
+body {
+  margin:0;
+  background:var(--bg);
+  color:var(--text);
+  font-family:Arial,Helvetica,sans-serif;
+  font-size:1rem;
+  line-height:1.5;
+}
+button,input,select { font:inherit; }
+button,input,select {
+  min-height:54px;
+  border:2px solid var(--border);
+  border-radius:12px;
+  padding:12px 16px;
+}
+button {
+  background:var(--panel2);
+  color:var(--text);
+  cursor:pointer;
+  font-weight:700;
+}
+button.primary { background:#126e50; border-color:#38bd88; }
+button:focus,input:focus,select:focus,.channel:focus {
+  outline:4px solid var(--green);
+  outline-offset:3px;
+}
+input,select {
+  width:100%;
+  background:#07101c;
+  color:var(--text);
+  min-width:0;
+}
+button:disabled { opacity:.45; }
+header {
+  padding:24px clamp(18px,3vw,48px);
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:20px;
+  flex-wrap:wrap;
+  border-bottom:1px solid var(--border);
+  background:#0e1928;
+}
+h1 { margin:0; font-size:clamp(1.7rem,3vw,2.6rem); }
+h2 { font-size:1.35rem; margin:0 0 14px; }
+h3 { margin:0 0 10px; font-size:1.1rem; }
+p { margin:8px 0; }
+.small { font-size:.9rem; color:var(--muted); }
+.status { color:var(--green); font-weight:bold; }
+main {
+  width:100%;
+  max-width:2200px;
+  margin:auto;
+  padding:clamp(16px,2.5vw,40px);
+}
+.panel {
+  background:var(--panel);
+  border:1px solid var(--border);
+  border-radius:18px;
+  padding:clamp(16px,2vw,28px);
+  min-width:0;
+}
+.topgrid {
+  display:grid;
+  grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);
+  gap:22px;
+  margin-bottom:22px;
+}
+.stack { display:grid; gap:14px; }
+.row {
+  display:flex;
+  align-items:stretch;
+  gap:12px;
+}
+.row > * { min-width:0; }
+.row input { flex:1; }
+.row button { flex-shrink:0; }
+.sources {
+  display:flex;
+  flex-wrap:wrap;
+  gap:10px;
+}
+.sources button { font-size:.9rem; }
+.content {
+  display:grid;
+  grid-template-columns:minmax(0,1fr) minmax(350px,.85fr);
+  gap:22px;
+  align-items:start;
+}
+.channel-panel { min-width:0; }
+.channel-list {
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(min(100%,310px),1fr));
+  gap:12px;
+  margin-top:16px;
+}
+.channel {
+  display:flex;
+  align-items:center;
+  gap:14px;
+  min-height:88px;
+  padding:14px;
+  border:2px solid var(--border);
+  border-radius:14px;
+  background:#0c1928;
+  cursor:pointer;
+  overflow:hidden;
+}
+.channel:hover,.channel.selected {
+  border-color:var(--green);
+  background:#17352f;
+}
+.channel .num {
+  flex-shrink:0;
+  width:44px;
+  height:44px;
+  border-radius:12px;
+  background:#263c55;
+  display:grid;
+  place-items:center;
+  font-weight:bold;
+  font-size:1.05rem;
+}
+.channel .name {
+  font-size:1rem;
+  font-weight:bold;
+  overflow-wrap:anywhere;
+}
+.channel .group {
+  font-size:.8rem;
+  color:var(--muted);
+  overflow-wrap:anywhere;
+}
+.player {
+  position:sticky;
+  top:12px;
+}
+video {
+  display:block;
+  width:100%;
+  aspect-ratio:16/9;
+  background:#000;
+  border-radius:12px;
+  margin:14px 0;
+}
+.player-name {
+  font-size:1.25rem;
+  font-weight:bold;
+  overflow-wrap:anywhere;
+}
+.message {
+  padding:14px;
+  border-radius:12px;
+  background:#172a3f;
+  overflow-wrap:anywhere;
+}
+.message.error { border:1px solid #8d4141; color:#ffd5d5; }
+.message.good { border:1px solid #287d5c; color:#c9ffe5; }
+.hidden { display:none !important; }
+.actions { display:flex; gap:10px; flex-wrap:wrap; }
+.actions button { flex:1; }
+footer {
+  color:var(--muted);
+  padding:24px;
+  text-align:center;
+  font-size:.85rem;
+}
+@media(max-width:1000px) {
+  .topgrid,.content { grid-template-columns:1fr; }
+  .player { position:static; }
+}
+@media(max-width:600px) {
+  html { font-size:18px; }
+  header { align-items:flex-start; }
+  .row { flex-direction:column; }
+  .row button { width:100%; }
+  .channel-list { grid-template-columns:1fr; }
+}
+</style>
+</head>
+<body>
+<header>
+  <div>
+    <h1>📺 IPTV TV</h1>
+    <p class="small">Büyük ekran • Kumanda dostu • M3U / M3U8</p>
+  </div>
+  <div class="status" id="status">Hazır</div>
+</header>
+
+<main>
+  <section class="topgrid">
+    <div class="panel stack">
+      <h2>1. Liste ekle</h2>
+      <label for="playlistUrl">M3U / M3U8 liste adresi</label>
+      <input id="playlistUrl" type="url"
+        placeholder="https://ornek.com/liste.m3u"
+        autocomplete="url">
+      <div class="row">
+        <button class="primary" id="loadUrl">Listeyi yükle</button>
+        <button id="saveUrl">Kaynak olarak kaydet</button>
+      </div>
+
+      <div class="sources">
+        <button data-url="https://onureroz.com/indirmeler/turk/index.m3u">
+          Türk kanalları
+        </button>
+        <button data-url="https://onureroz.com/indirmeler/turk/all.m3u">
+          Türkçe alternatif
+        </button>
+        <button data-url="https://onureroz.com/indirmeler/dunya/index.m3u">
+          Dünya kanalları
+        </button>
+        <button data-url="https://iptv-org.github.io/iptv/index.m3u">
+          IPTV-ORG
+        </button>
+        <button data-url="https://raw.githubusercontent.com/Free-TV/IPTV/master/playlist.m3u8">
+          Free-TV
+        </button>
+      </div>
+
+      <div class="message small">
+        Hazır kaynakların erişilebilirliği değişebilir. Bir kaynak CORS
+        nedeniyle engellenirse aşağıdaki hata açıklamasını incele.
+      </div>
+    </div>
+
+    <div class="panel stack">
+      <h2>2. Dosya veya kayıtlı kaynak</h2>
+      <label for="playlistFile">Cihazdaki M3U dosyasını seç</label>
+      <input id="playlistFile" type="file"
+        accept=".m3u,.m3u8,.txt,audio/x-mpegurl,application/vnd.apple.mpegurl">
+      <p class="small">
+        LG webOS tarayıcısı dosya seçimini desteklemiyorsa URL yöntemini kullan.
+      </p>
+
+      <label for="savedSources">Kayıtlı kaynaklar</label>
+      <select id="savedSources">
+        <option value="">Kaynak seç...</option>
+      </select>
+      <div class="row">
+        <button id="loadSaved">Seçili kaynağı yükle</button>
+        <button id="removeSaved">Kaydı sil</button>
+      </div>
+      <button id="exportList">Kanalları M3U olarak dışa aktar</button>
+    </div>
+  </section>
+
+  <section class="content">
+    <div class="panel channel-panel">
+      <h2>Kanallar</h2>
+      <div class="row">
+        <input id="search" type="search" placeholder="Kanal ara..."
+          aria-label="Kanal ara">
+        <select id="groupFilter" aria-label="Gruba göre filtrele">
+          <option value="">Tüm gruplar</option>
+        </select>
+      </div>
+      <p id="count" class="small">Henüz liste yüklenmedi.</p>
+      <div id="channelList" class="channel-list"></div>
+    </div>
+
+    <div class="panel player">
+      <h2>Oynatıcı</h2>
+      <div id="nowPlaying" class="player-name">Kanal seçilmedi</div>
+      <video id="video" controls playsinline></video>
+      <div class="actions">
+        <button id="playButton" class="primary">▶ Oynat</button>
+        <button id="stopButton">■ Durdur</button>
+      </div>
+      <div id="message" class="message" style="margin-top:14px" role="status" aria-live="polite">
+        Önce bir liste yükle, ardından kanal seç.
+      </div>
+      <p class="small">
+        Bazı yayınlar coğrafi kısıtlama, yayın süresinin dolması, codec
+        uyumsuzluğu veya sağlayıcı politikaları nedeniyle çalışmayabilir.
+      </p>
+    </div>
+  </section>
+</main>
+
+<footer>
+  Bu uygulama yayın sağlamaz; kullanıcı tarafından girilen liste adreslerini
+  ve erişim hakkına sahip olduğun yayınları yönetmek için tasarlanmıştır.
+</footer>
+
 <script>
-(()=>{'use strict';const $=id=>document.getElementById(id);let entries=[],sourceName='liste',hls=null;const safeHttp=value=>{try{const u=new URL(value);return ['http:','https:'].includes(u.protocol)?u.href:''}catch{return ''}};
-function setStatus(msg){$('status').textContent=msg}function parseM3U(text){const lines=text.replace(/^\uFEFF/,'').split(/\r?\n/);const out=[];let meta=null;for(const raw of lines){const line=raw.trim();if(!line)continue;if(line.startsWith('#EXTINF')){const comma=line.indexOf(',');const attrs=comma>=0?line.slice(0,comma):line;const title=comma>=0?line.slice(comma+1).trim():'Adsız kanal';const group=attrs.match(/group-title\s*=\s*["']([^"']*)["']/i);const logo=attrs.match(/tvg-logo\s*=\s*["']([^"']*)["']/i);meta={name:title||'Adsız kanal',group:group?.[1]||'Diğer',logo:logo?.[1]||''};continue}if(line.startsWith('#'))continue;const url=safeHttp(line);if(url&&meta){out.push({...meta,url});meta=null}}return out}
-function render(){const q=$('search').value.trim().toLocaleLowerCase('tr');const g=$('group').value;const filtered=entries.filter(e=>(!q||e.name.toLocaleLowerCase('tr').includes(q)||e.group.toLocaleLowerCase('tr').includes(q))&&(!g||e.group===g));$('count').textContent=`${filtered.length} / ${entries.length} kanal`;$('export').disabled=!entries.length;if(!filtered.length){$('channels').innerHTML='<div class="empty">Eşleşen kanal bulunamadı.</div>';return}const frag=document.createDocumentFragment();filtered.slice(0,1500).forEach(e=>{const b=document.createElement('button');b.className='channel';const n=document.createElement('span');n.className='name';n.textContent=e.name;const sub=document.createElement('small');sub.textContent=e.group;b.append(n,sub);b.addEventListener('click',()=>play(e));frag.append(b)});$('channels').replaceChildren(frag);if(filtered.length>1500){const note=document.createElement('p');note.className='tiny';note.textContent='Performans için ilk 1500 sonuç gösteriliyor; aramayı daraltın.';$('channels').append(note)}}
-function setEntries(text,name){const parsed=parseM3U(text);if(!parsed.length)throw new Error('Geçerli kanal satırı bulunamadı. Dosyanın M3U biçiminde olduğundan emin olun.');entries=parsed;sourceName=name;const groups=[...new Set(entries.map(e=>e.group))].sort((a,b)=>a.localeCompare(b,'tr'));$('group').replaceChildren(new Option('Tüm gruplar',''),...groups.map(g=>new Option(g,g)));$('search').value='';render();setStatus(`${name}: ${entries.length} kanal yüklendi.`)}async function loadRemote(url){const valid=safeHttp(url);if(!valid){setStatus('Geçerli bir HTTP/HTTPS adresi girin.');return}$('url').value=valid;setStatus('Liste indiriliyor…');try{const r=await fetch(valid,{cache:'no-store',redirect:'follow'});if(!r.ok)throw new Error(`Sunucu HTTP ${r.status} döndürdü.`);const text=await r.text();if(text.length>20*1024*1024)throw new Error('Liste 20 MB sınırını aşıyor.');setEntries(text,new URL(valid).hostname)}catch(err){setStatus(`Yüklenemedi: ${err.message}. Bu genellikle CORS veya kaynak erişimi nedeniyle olabilir; dosyayı indirip yerel dosya olarak deneyin.`)}}
-function play(e){const video=$('video');if(hls){hls.destroy();hls=null}video.pause();video.removeAttribute('src');video.load();const url=e.url;$('playing').textContent=`Seçilen kanal: ${e.name}`;if(/\.m3u8(?:$|\?)/i.test(url)){if(video.canPlayType('application/vnd.apple.mpegurl'))video.src=url;else if(window.Hls&&Hls.isSupported()){hls=new Hls();hls.loadSource(url);hls.attachMedia(video)}else{$('playing').textContent='Bu tarayıcı HLS oynatmayı desteklemiyor.';return}}else video.src=url;video.play().catch(()=>{$('playing').textContent=`${e.name} seçildi. Otomatik oynatma engellendi veya yayın açılamadı; oynat düğmesine basın.`})}
-$('loadUrl').addEventListener('click',()=>loadRemote($('url').value));$('url').addEventListener('keydown',e=>{if(e.key==='Enter')loadRemote($('url').value)});document.querySelectorAll('[data-url]').forEach(b=>b.addEventListener('click',()=>loadRemote(b.dataset.url)));$('file').addEventListener('change',async e=>{const f=e.target.files?.[0];if(!f)return;if(f.size>20*1024*1024){setStatus('Dosya 20 MB sınırını aşıyor.');return}try{setEntries(await f.text(),f.name)}catch(err){setStatus(err.message)}});$('search').addEventListener('input',render);$('group').addEventListener('change',render);$('export').addEventListener('click',()=>{const body=['#EXTM3U',...entries.flatMap(e=>[`#EXTINF:-1 group-title="${e.group.replace(/["\r\n]/g,'')} ",${e.name.replace(/[\r\n]/g,' ')}`,e.url])].join('\n');const blob=new Blob([body],{type:'audio/x-mpegurl;charset=utf-8'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='ortak-iptv-listesi.m3u';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)});
-// HLS.js is loaded only for browsers without native HLS support.
-const s=document.createElement('script');s.src='https://cdn.jsdelivr.net/npm/hls.js@1/dist/hls.min.js';s.async=true;document.head.append(s);
-})();
-</script></body></html>
+(function () {
+  "use strict";
+
+  const $ = id => document.getElementById(id);
+  const video = $("video");
+  const MAX_BYTES = 20 * 1024 * 1024;
+  const MAX_CHANNELS = 20000;
+
+  let channels = [];
+  let selectedChannel = null;
+  let currentObjectUrl = null;
+  let hls = null;
+  let loadVersion = 0;
+
+  function setStatus(text) {
+    $("status").textContent = text;
+  }
+
+  function message(text, type) {
+    const box = $("message");
+    box.className = "message" + (type ? " " + type : "");
+    box.textContent = text;
+  }
+
+  function safeHttpUrl(value) {
+    try {
+      const u = new URL(value);
+      return (u.protocol === "https:" || u.protocol === "http:")
+        ? u.href : "";
+    } catch (_) {
+      return "";
+    }
+  }
+
+  function parseAttributes(line) {
+    const result = {};
+    const re = /([\w-]+)="([^"]*)"/g;
+    let match;
+    while ((match = re.exec(line)) !== null) {
+      result[match[1].toLowerCase()] = match[2];
+    }
+    return result;
+  }
+
+  function parseM3U(text) {
+    const lines = text.replace(/^\uFEFF/, "").split(/\r?\n/);
+    const result = [];
+    let pending = null;
+
+    for (let raw of lines) {
+      const line = raw.trim();
+      if (!line) continue;
+
+      if (/^#EXTINF:/i.test(line)) {
+        const comma = line.indexOf(",");
+        const info = comma >= 0 ? line.slice(0, comma) : line;
+        const title = comma >= 0 ? line.slice(comma + 1).trim() : "İsimsiz kanal";
+        const attrs = parseAttributes(info);
+        pending = {
+          name: title || "İsimsiz kanal",
+          group: attrs["group-title"] || "Diğer",
+          logo: safeHttpUrl(attrs["tvg-logo"] || ""),
+          url: ""
+        };
+        continue;
+      }
+
+      if (line.startsWith("#")) continue;
+
+      // Bu basit ayrıştırıcı, EXTINF sonrasındaki URL'yi kanal adresi sayar.
+      // Segment listeleri gibi medya manifestleri bir kanal listesi değildir.
+      if (pending) {
+        const url = safeHttpUrl(line);
+        if (url) {
+          pending.url = url;
+          result.push(pending);
+          if (result.length >= MAX_CHANNELS) break;
+        }
+        pending = null;
+      }
+    }
+    return result;
+  }
+
+  function renderGroups() {
+    const select = $("groupFilter");
+    const old = select.value;
+    select.replaceChildren(new Option("Tüm gruplar", ""));
+    const groups = [...new Set(channels.map(c => c.group))]
+      .sort((a, b) => a.localeCompare(b, "tr"));
+
+    groups.forEach(g => select.add(new Option(g, g)));
+    if (groups.includes(old)) select.value = old;
+  }
+
+  function renderChannels() {
+    const query = $("search").value.trim().toLocaleLowerCase("tr");
+    const group = $("groupFilter").value;
+    const list = $("channelList");
+    list.replaceChildren();
+
+    const filtered = channels.filter(c =>
+      (!group || c.group === group) &&
+      c.name.toLocaleLowerCase("tr").includes(query)
+    );
+
+    $("count").textContent =
+      filtered.length + " kanal gösteriliyor · " + channels.length + " toplam";
+
+    const frag = document.createDocumentFragment();
+
+    filtered.slice(0, 1500).forEach((channel, i) => {
+      const item = document.createElement("div");
+      item.className = "channel" +
+        (selectedChannel === channel ? " selected" : "");
+      item.tabIndex = 0;
+      item.setAttribute("role", "button");
+      item.setAttribute("aria-label", channel.name + ", oynat");
+
+      const number = document.createElement("div");
+      number.className = "num";
+      number.textContent = String(i + 1);
+
+      const info = document.createElement("div");
+      info.style.minWidth = "0";
+
+      const name = document.createElement("div");
+      name.className = "name";
+      name.textContent = channel.name;
+
+      const groupText = document.createElement("div");
+      groupText.className = "group";
+      groupText.textContent = channel.group;
+
+      info.append(name, groupText);
+      item.append(number, info);
+
+      const choose = () => {
+        selectedChannel = channel;
+        $("nowPlaying").textContent = channel.name;
+        renderChannels();
+        playSelected();
+      };
+
+      item.addEventListener("click", choose);
+      item.addEventListener("keydown", e => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          choose();
+        }
+      });
+
+      frag.appendChild(item);
+    });
+
+    list.appendChild(frag);
+    if (filtered.length > 1500) {
+      const note = document.createElement("p");
+      note.className = "small";
+      note.textContent = "Performans için ilk 1500 sonuç gösteriliyor. Arama yaparak daraltabilirsin.";
+      list.appendChild(note);
+    }
+  }
+
+  function disposePlayer() {
+    if (hls) {
+      try { hls.destroy(); } catch (_) {}
+      hls = null;
+    }
+    try { video.pause(); } catch (_) {}
+    video.removeAttribute("src");
+    video.load();
+  }
+
+  async function playSelected() {
+    if (!selectedChannel) {
+      message("Önce bir kanal seç.", "error");
+      return;
+    }
+
+    const url = safeHttpUrl(selectedChannel.url);
+    if (!url) {
+      message("Kanal adresi geçerli bir HTTP/HTTPS adresi değil.", "error");
+      return;
+    }
+
+    disposePlayer();
+    const isHls = /\.m3u8(?:$|[?#])/i.test(url);
+
+    try {
+      // TV tarayıcısında yerel HLS desteği varsa onu tercih et.
+      if (isHls && video.canPlayType("application/vnd.apple.mpegurl")) {
+        video.src = url;
+      } else {
+        // hls.js yalnızca desteklenen tarayıcılarda çalışır.
+        if (isHls && window.Hls && window.Hls.isSupported()) {
+          hls = new window.Hls();
+          hls.loadSource(url);
+          hls.attachMedia(video);
+          hls.on(window.Hls.Events.ERROR, function (_event, data) {
+            if (data && data.fatal) {
+              message("HLS oynatma hatası. Yayın, tarayıcı veya sunucu uyumsuz olabilir.", "error");
+            }
+          });
+        } else {
+          video.src = url;
+        }
+      }
+
+      const result = video.play();
+      if (result && typeof result.then === "function") {
+        await result;
+      }
+      message("Oynatma başlatıldı: " + selectedChannel.name, "good");
+    } catch (err) {
+      message(
+        "Oynatma başlatılamadı. TV tarayıcısı formatı desteklemiyor olabilir; " +
+        "yayın adresi erişilemez veya izin gerektiriyor olabilir.",
+        "error"
+      );
+    }
+  }
+
+  function useText(text, label) {
+    if (text.length > MAX_BYTES) {
+      message("Liste 20 MB sınırını aşıyor.", "error");
+      return;
+    }
+
+    const parsed = parseM3U(text);
+    if (!parsed.length) {
+      message("Kanal bulunamadı. Adresin M3U kanal listesi olduğundan emin ol.", "error");
+      return;
+    }
+
+    channels = parsed;
+    selectedChannel = null;
+    $("nowPlaying").textContent = "Kanal seçilmedi";
+    disposePlayer();
+    renderGroups();
+    renderChannels();
+    setStatus(channels.length + " kanal");
+    message(label + " yüklendi. " + channels.length + " kanal bulundu.", "good");
+  }
+
+  async function loadRemote(rawUrl) {
+    const url = safeHttpUrl(rawUrl);
+    if (!url) {
+      message("Lütfen geçerli bir HTTP/HTTPS liste adresi gir.", "error");
+      return;
+    }
+
+    const version = ++loadVersion;
+    setStatus("Yükleniyor...");
+    message("Liste adresinden veri isteniyor...");
+
+    try {
+      const response = await fetch(url, {
+        method: "GET",
+        cache: "no-store",
+        credentials: "omit",
+        redirect: "follow"
+      });
+
+      if (version !== loadVersion) return;
+      if (!response.ok) throw new Error("HTTP " + response.status);
+
+      const declaredLength = Number(response.headers.get("content-length") || 0);
+      if (declaredLength > MAX_BYTES) throw new Error("Liste 20 MB sınırını aşıyor.");
+
+      const text = await response.text();
+      if (version !== loadVersion) return;
+      if (text.length > MAX_BYTES) throw new Error("Liste 20 MB sınırını aşıyor.");
+
+      useText(text, "Liste");
+    } catch (err) {
+      if (version !== loadVersion) return;
+      setStatus("Yükleme başarısız");
+      message(
+        "Liste alınamadı. CORS engeli, ağ sorunu veya HTTP hatası olabilir. " +
+        "Bu durumda dosyayı kendi cihazında yüklemek ya da yalnızca izinli "
